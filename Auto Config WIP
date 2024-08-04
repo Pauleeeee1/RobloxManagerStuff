@@ -1,3 +1,5 @@
+
+-- Get the LocalPlayer's name
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local UserName = Player.Name
@@ -6,7 +8,8 @@ print(UserName)
 
 -- Define paths
 local folder_path = "/" .. getgenv().Config["Folder Name"]
-local file_path = folder_path .. "/" .. getgenv().Config["Config Name"] .. ".json"
+local file_name = getgenv().Config["Config Name"] .. ".json"
+local file_path = folder_path .. "/" .. file_name
 
 -- Function to create a folder
 local function createFolder()
@@ -18,12 +21,21 @@ local function createFile()
 	local configString = getgenv().Config["Content"]  -- Assuming "Content" is the data to write to the file
 
 	if getgenv().Config["Is Script User Only"] then
-		local userPrefix = getgenv().Config["Config for User Only"][1]  -- Assuming you want to use the first part
-		local userSuffix = getgenv().Config["Config for User Only"][2]  -- Assuming you want to use the second part
-		local filename = userPrefix .. UserName .. userSuffix .. ".json"
-		writefile(folder_path .. "/" .. filename, configString)
+		local userPrefix = getgenv().Config["Config for User Only"][1]
+		local userSuffix = getgenv().Config["Config for User Only"][2]
+		local userFileName = userPrefix .. UserName .. userSuffix .. ".json"
+
+		if getgenv().Config["Is in folder"] then
+			writefile(folder_path .. "/" .. userFileName, configString)
+		else
+			writefile("/" .. userFileName, configString)
+		end
 	else
-		writefile(file_path, configString)
+		if getgenv().Config["Is in folder"] then
+			writefile(file_path, configString)
+		else
+			writefile("/" .. file_name, configString)
+		end
 	end
 end
 
@@ -39,7 +51,7 @@ if getgenv().Config["Is in folder"] then
 		createFile()
 	end
 else
-	if not isfile(file_path) then
+	if not isfile("/" .. file_name) then
 		createFile()
 	end
 end
