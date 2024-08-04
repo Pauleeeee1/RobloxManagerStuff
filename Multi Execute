@@ -17,11 +17,24 @@ end
 local function isUserInAccounts(userId)
 	for _, account in ipairs(getgenv().Config.Accounts) do
 		if account.ID == userId then
-			return true
+			-- Wenn die ID gefunden wird, führe zusätzliche Checks durch
+			-- Beispiel: Überprüfe, ob das Skript existiert
+			local scriptKey = "Script " .. account.script
+			local scriptUrl = getgenv().Config.Scripts[scriptKey]
+
+			if scriptUrl then
+				-- ID und Skript wurden gefunden
+				return true
+			else
+				-- ID gefunden, aber kein Skript zugewiesen
+				debugprint("Script URL not found for script ID:", account.script)
+				return false
+			end
 		end
 	end
 	return false
 end
+
 
 local function getUserScripts(userId)
 	local userScripts = {}
