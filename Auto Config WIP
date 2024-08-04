@@ -1,5 +1,3 @@
-
--- Get the LocalPlayer's name
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local UserName = Player.Name
@@ -41,13 +39,10 @@ end
 
 -- Check if the folder exists and create it if necessary
 if getgenv().Config["Is in folder"] then
-	if isfolder(folder_path) then
-		if not isfile(file_path) then
-			createFile()
-		end
-	else
+	if not isfolder(folder_path) then
 		createFolder()
-		-- Create the file after creating the folder
+	end
+	if not isfile(file_path) then
 		createFile()
 	end
 else
