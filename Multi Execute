@@ -1,5 +1,3 @@
-_G.DebugPrint = false
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserID = LocalPlayer.UserId
