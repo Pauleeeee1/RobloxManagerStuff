@@ -1,56 +1,59 @@
--- Get the LocalPlayer's name
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local UserName = Player.Name
 
-print(UserName)
+local folderPath = "/" .. getgenv().Config.folder_name
+local fileName = getgenv().Config.config_name .. ".json"
+local filePath = folderPath .. "/" .. fileName
 
--- Define paths
-local folder_path = "/" .. getgenv().Config["Folder Name"]
-local file_name = getgenv().Config["Config Name"] .. ".json"
-local file_path = folder_path .. "/" .. file_name
-
--- Function to create a folder
-local function createFolder()
-	makefolder(folder_path)
+local function createFolder(path)
+	local success, err = pcall(makefolder, path)
+	if not success then
+		warn("Failed to create folder at '" .. path .. "': " .. tostring(err))
+	end
 end
 
--- Function to create a file
-local function createFile()
-	local configString = getgenv().Config["Content"]  -- Assuming "Content" is the data to write to the file
+local function createFile(path, content)
+	local success, err = pcall(writefile, path, content)
+	if not success then
+		warn("Failed to create file at '" .. path .. "': " .. tostring(err))
+	end
+end
 
-	if getgenv().Config["Is Script User Only"] then
-		local userPrefix = getgenv().Config["Config for User Only"][1]
-		local userSuffix = getgenv().Config["Config for User Only"][2]
-		local userFileName = userPrefix .. UserName .. userSuffix .. ".json"
 
-		if getgenv().Config["Is in folder"] then
-			writefile(folder_path .. "/" .. userFileName, configString)
-		else
-			writefile("/" .. userFileName, configString)
-		end
+local function generateUserFileName(prefix, suffix, username)
+	if not prefix then prefix = "" end
+	if not suffix then suffix = "" end
+	if not username then username = "UnknownUser" end
+	return prefix .. username .. suffix .. ".json"
+end
+
+
+local function checkAndCreateFile(path, content)
+	if not isfile(path) then
+		createFile(path, content)
+	end
+end
+
+local function handleFileCreation()
+	local configString = game.HttpService:JSONEncode(getgenv().Config.content) 
+
+	if getgenv().Config.is_script_user_only then
+		local userPrefix = getgenv().Config.config_for_user_only[1]
+		local userSuffix = getgenv().Config.config_for_user_only[2]
+		local userFileName = generateUserFileName(userPrefix, userSuffix, UserName)
+		local userFilePath = getgenv().Config.is_in_folder and (folderPath .. "/" .. userFileName) or ("/" .. userFileName)
+
+		checkAndCreateFile(userFilePath, configString)
 	else
-		if getgenv().Config["Is in folder"] then
-			writefile(file_path, configString)
-		else
-			writefile("/" .. file_name, configString)
-		end
+		local path = getgenv().Config.is_in_folder and filePath or ("/" .. fileName)
+		checkAndCreateFile(path, configString)
 	end
 end
 
--- Check if the folder exists and create it if necessary
-if getgenv().Config["Is in folder"] then
-	if isfolder(folder_path) then
-		if not isfile(file_path) then
-			createFile()
-		end
-	else
-		createFolder()
-		-- Create the file after creating the folder
-		createFile()
-	end
-else
-	if not isfile("/" .. file_name) then
-		createFile()
+if getgenv().Config.is_in_folder then
+	if not isfolder(folderPath) then
+		createFolder(folderPath)
 	end
 end
+handleFileCreation()
